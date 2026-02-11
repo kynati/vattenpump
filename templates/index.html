@@ -116,10 +116,12 @@
         
         <div class="section">
             <h2>📅 Tidschema</h2>
+            <div id="scheduleCountdown" style="display: none; text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 15px; padding: 10px; background: #1e1e2e; border-radius: 4px; color: var(--success);">⏲️ <span id="countdownText">30</span>s återstår</div>
             <p style="font-size: 12px; margin-bottom: 10px;">Pumpen startar automatiskt på dessa tider</p>
             <div id="scheduleList"></div>
-            <div style="display: grid; grid-template-columns: 1fr 60px; gap: 10px; margin-top: 10px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 60px; gap: 10px; margin-top: 10px;">
                 <input type="time" id="scheduleTime" value="08:00">
+                <input type="number" id="scheduleDuration" value="30" placeholder="Sekunder" min="1" max="300" style="padding: 8px; border: 1px solid var(--accent); background: var(--bg-secondary); color: var(--text); border-radius: 4px; font-size: 14px;">
                 <button onclick="addSchedule()" style="background: var(--success); color: #000;">➕</button>
             </div>
         </div>
@@ -226,12 +228,13 @@
         
         function addSchedule() {
             const time = document.getElementById('scheduleTime').value;
-            if (time && !schedule.includes(time)) {
-                schedule.push(time);
-                schedule.sort();
+            const duration = parseInt(document.getElementById('scheduleDuration').value) || 30;
+            if (time && !schedule.some(s => s.time === time)) {
+                schedule.push({ time, duration });
+                schedule.sort((a, b) => a.time.localeCompare(b.time));
                 saveSettings();
                 renderSchedule();
-                addLog(`📅 Schema tillagt: ${time}`);
+                addLog(`📅 Schema tillagt: ${time} (${duration}s)`);
             }
         }
         
@@ -240,15 +243,16 @@
             if (schedule.length === 0) {
                 scheduleList.innerHTML = '<p style="font-size: 12px; color: #888;">Ingen schemaläggning</p>';
             } else {
-                scheduleList.innerHTML = schedule.map(time => `<div class="schedule-item"><span style="font-weight: bold;">${time}</span><button onclick="removeSchedule('${time}')" style="background: var(--danger); width: 100%; padding: 6px;">❌</button></div>`).join('');
+                scheduleList.innerHTML = schedule.map((s, idx) => `<div class="schedule-item"><span style="font-weight: bold;">${s.time} <span style="color: #888;">(${s.duration}s)</span></span><button onclick="removeSchedule(${idx})" style="background: var(--danger); width: 100%; padding: 6px;">❌</button></div>`).join('');
             }
         }
         
-        function removeSchedule(time) {
-            schedule = schedule.filter(t => t !== time);
+        function removeSchedule(idx) {
+            const timeStr = schedule[idx].time;
+            schedule.splice(idx, 1);
             saveSettings();
             renderSchedule();
-            addLog(`📅 Schema borttagen: ${time}`);
+            addLog(`📅 Schema borttagen: ${timeStr}`);
         }
         
         async function startPump() {
@@ -346,9 +350,25 @@
             
             const now = new Date();
             const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-            if (schedule.includes(currentTime) && !data.pump_running) {
+            const scheduleMatch = schedule.find(s => s.time === currentTime);
+            
+            if (scheduleMatch && !data.pump_running && !window.scheduleActive) {
+                window.scheduleActive = true;
+                window.scheduleEndTime = Date.now() + (scheduleMatch.duration * 1000);
                 startPump();
-                addLog(`📅 Schemaläggd körning: ${currentTime}`);
+                addLog(`📅 Schemaläggd körning: ${currentTime} (${scheduleMatch.duration}s)`);
+                document.getElementById('scheduleCountdown').style.display = 'block';
+            }
+            
+            if (window.scheduleActive) {
+                const remaining = Math.max(0, Math.ceil((window.scheduleEndTime - Date.now()) / 1000));
+                document.getElementById('countdownText').textContent = remaining;
+                if (remaining <= 0) {
+                    stopPump();
+                    addLog(`📅 Schemaläggd körning slutförd`);
+                    window.scheduleActive = false;
+                    document.getElementById('scheduleCountdown').style.display = 'none';
+                }
             }
         }
         
