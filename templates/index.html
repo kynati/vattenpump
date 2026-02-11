@@ -5,368 +5,281 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>💧 Pump Kontroll</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-primary: #1e1e2e;
+            --bg-secondary: #2d2d3d;
+            --text-primary: #ffffff;
+            --accent: #00d4ff;
+            --success: #00ff41;
+            --danger: #ff0055;
+            --warning: #ff9500;
         }
-        
+        body.light-mode {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f5;
+            --text-primary: #000000;
+            --accent: #0080ff;
+            --success: #00aa00;
+            --danger: #ff0000;
+            --warning: #ff7700;
+        }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: #1e1e2e;
-            color: #ffffff;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             padding: 10px;
+            transition: background 0.3s;
         }
-        
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        
+        .container { max-width: 800px; margin: 0 auto; }
         header {
             text-align: center;
             padding: 20px 0;
-            border-bottom: 2px solid #00d4ff;
+            border-bottom: 2px solid var(--accent);
             margin-bottom: 20px;
-        }
-        
-        h1 {
-            font-size: 28px;
-            color: #00d4ff;
-            margin-bottom: 5px;
-        }
-        
-        .mode {
-            font-size: 12px;
-            color: #888888;
-        }
-        
-        .section {
-            background: #2d2d3d;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-left: 4px solid #00d4ff;
-        }
-        
-        .section h2 {
-            font-size: 16px;
-            margin-bottom: 15px;
-            color: #00d4ff;
-        }
-        
-        .status-box {
-            background: #1e1e2e;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-        
-        .status-box.stopped {
-            color: #ff0055;
-        }
-        
-
-        
-        .button-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        
-        button {
-            padding: 12px;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-        
-        button:active {
-            opacity: 0.8;
-        }
-        
-        .btn-start {
-            background: #00ff41;
-            color: #000;
-        }
-        
-        .btn-stop {
-            background: #ff0055;
-            color: #fff;
-        }
-        
-        .timer-input {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-        
-        input[type="number"] {
-            padding: 10px;
-            border: 1px solid #00d4ff;
-            background: #1e1e2e;
-            color: #fff;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        
-        input[type="number"]::placeholder {
-            color: #666;
-        }
-        
-        .sensors {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 10px;
-        }
-        
-        .sensor {
-            padding: 10px;
-            border-radius: 4px;
-            font-size: 14px;
-            text-align: center;
-            transition: background 0.3s;
-        }
-        
-        .sensor.wet {
-            background: #00ff41;
-            color: #000;
-        }
-        
-        .sensor.dry {
-            background: #ff0055;
-            color: #fff;
-        }
-        
-        .temp {
-            text-align: center;
-            font-size: 18px;
-            margin-bottom: 15px;
-            padding: 10px;
-            background: #1e1e2e;
-            border-radius: 4px;
-        }
-        
-        .timer-display {
-            text-align: center;
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            padding: 10px;
-            background: #1e1e2e;
-            border-radius: 4px;
-            color: #888;
-        }
-        
-        .timer-display.running {
-            color: #00ff41;
-        }
-        
-        /* Pump Animation */
-        @keyframes pump-pulse {
-            0%, 100% {
-                transform: scale(1);
-                box-shadow: 0 0 0 0 rgba(0, 255, 65, 0.7);
-            }
-            50% {
-                transform: scale(1.05);
-                box-shadow: 0 0 20px 10px rgba(0, 255, 65, 0.3);
-            }
-        }
-        
-        @keyframes pump-spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .status-box.running {
-            animation: pump-pulse 1.5s infinite;
-        }
-        
-        .status-box.running::after {
-            content: ' ⚙️';
-            display: inline-block;
-            animation: pump-spin 2s linear infinite;
-        }
-        
-        /* Moisture Progress Bar */
-        .moisture-bar {
-            width: 100%;
-            height: 25px;
-            background: #1e1e2e;
-            border-radius: 8px;
-            overflow: hidden;
-            margin-top: 8px;
-            border: 1px solid #444;
-        }
-        
-        .moisture-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #ff0055, #ff6b00, #00ff41);
-            transition: width 0.5s ease;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: flex-end;
-            padding-right: 8px;
-            font-size: 12px;
-            font-weight: bold;
-            color: #fff;
         }
-        
-        @media (max-width: 600px) {
-            body {
-                padding: 5px;
-            }
-            
-            h1 {
-                font-size: 24px;
-            }
-            
-            .section {
-                padding: 12px;
-            }
-        }
+        .header-title { flex: 1; }
+        h1 { font-size: 28px; color: var(--accent); margin-bottom: 5px; }
+        .mode { font-size: 12px; color: #888888; }
+        .theme-toggle { background: var(--accent); color: var(--bg-primary); border: none; border-radius: 6px; padding: 8px 12px; cursor: pointer; font-weight: bold; font-size: 20px; }
+        .section { background: var(--bg-secondary); border-radius: 8px; padding: 15px; margin-bottom: 15px; border-left: 4px solid var(--accent); }
+        .section h2 { font-size: 16px; margin-bottom: 15px; color: var(--accent); }
+        .status-box { background: var(--bg-primary); padding: 15px; border-radius: 8px; text-align: center; font-size: 24px; font-weight: bold; margin-bottom: 15px; border: 2px solid var(--danger); }
+        .status-box.stopped { color: var(--danger); border-color: var(--danger); }
+        .status-box.running { color: var(--success); border-color: var(--success); animation: pump-pulse 1.5s infinite; }
+        .status-box.warning { color: var(--warning); border-color: var(--warning); }
+        .button-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        button { padding: 12px; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; transition: opacity 0.2s; }
+        button:active { opacity: 0.8; }
+        .btn-start { background: var(--success); color: #000; }
+        .btn-stop { background: var(--danger); color: #fff; }
+        .btn-auto { background: var(--accent); color: #000; }
+        .btn-auto.active { background: var(--success); }
+        input[type="number"], input[type="time"] { padding: 10px; border: 1px solid var(--accent); background: var(--bg-primary); color: var(--text-primary); border-radius: 4px; font-size: 14px; }
+        .sensors { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        .sensor { padding: 10px; border-radius: 4px; font-size: 14px; text-align: left; transition: background 0.3s; border: 1px solid #444; }
+        .sensor.wet { background: rgba(0, 255, 65, 0.2); color: var(--success); border-color: var(--success); }
+        .sensor.dry { background: rgba(255, 0, 85, 0.2); color: var(--danger); border-color: var(--danger); }
+        .temp { text-align: center; font-size: 18px; margin-bottom: 15px; padding: 10px; background: var(--bg-primary); border-radius: 4px; }
+        .timer-display { text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 10px; padding: 10px; background: var(--bg-primary); border-radius: 4px; color: #888; }
+        .timer-display.running { color: var(--success); }
+        .moisture-bar { width: 100%; height: 25px; background: var(--bg-primary); border-radius: 8px; overflow: hidden; margin-top: 8px; border: 1px solid #444; }
+        .moisture-fill { height: 100%; background: linear-gradient(90deg, var(--danger), #ff6b00, var(--success)); transition: width 0.5s ease; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; font-size: 12px; font-weight: bold; color: #fff; }
+        .log { background: var(--bg-primary); border: 1px solid var(--accent); border-radius: 4px; padding: 10px; font-size: 12px; max-height: 150px; overflow-y: auto; }
+        .log-entry { padding: 5px; border-bottom: 1px solid #444; font-family: monospace; }
+        .schedule-item { display: grid; grid-template-columns: 100px 1fr; gap: 10px; margin-bottom: 10px; align-items: center; }
+        @keyframes pump-pulse { 0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 255, 65, 0.7); } 50% { transform: scale(1.05); box-shadow: 0 0 20px 10px rgba(0, 255, 65, 0.3); } }
+        @media (max-width: 600px) { body { padding: 5px; } h1 { font-size: 24px; } .section { padding: 12px; } header { flex-direction: column; gap: 10px; } }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>💧 PUMP KONTROLL</h1>
-            <div class="mode">🎲 SIMULERING</div>
+            <div class="header-title">
+                <h1>💧 PUMP KONTROLL</h1>
+                <div class="mode">🎲 SIMULERING</div>
+            </div>
+            <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
         </header>
         
-        <!-- STATUS -->
         <div class="section">
             <div class="status-box stopped" id="statusBox">🔴 STOPPAD</div>
         </div>
         
-        <!-- PUMP KONTROLL -->
         <div class="section">
             <h2>💧 Pump Kontroll</h2>
-            
             <div class="button-group">
                 <button class="btn-start" onclick="startPump()">🟢 STARTA</button>
                 <button class="btn-stop" onclick="stopPump()">🔴 STOPPA</button>
             </div>
+            <button class="btn-auto" id="autoBtn" style="width: 100%; margin-top: 10px;" onclick="toggleAutoMode()">🤖 AUTO-MODE: AV</button>
         </div>
-
         
-        <!-- TIMER -->
+        <div class="section" id="autoSettings" style="display: none;">
+            <h2>⚙️ Auto-Mode</h2>
+            <p style="font-size: 12px; margin-bottom: 10px;">Starta när sensor < Min %, stoppa när > Max %</p>
+            <div id="autoLimits"></div>
+        </div>
+        
         <div class="section">
-            <h2>⏱️ Timer-kontroll</h2>
-            
+            <h2>⏱️ Timer</h2>
             <div class="timer-display" id="timerDisplay">⏱️ Timer: Inaktiv</div>
-            
-            <div class="timer-input">
-                <input type="number" id="timerSeconds" value="30" placeholder="Sekunder" min="1">
-                <input type="number" id="timerSpeed" value="100" placeholder="Hastighet" min="0" max="100">
-            </div>
-            
+            <input type="number" id="timerSeconds" value="30" placeholder="Sekunder" min="1" style="width: 100%; margin-bottom: 10px;">
             <div class="button-group">
                 <button class="btn-start" onclick="startTimer()">▶️ STARTA</button>
                 <button class="btn-stop" onclick="stopTimer()">⏹️ STOPPA</button>
             </div>
         </div>
         
-        <!-- SENSORER -->
+        <div class="section">
+            <h2>📅 Tidschema</h2>
+            <p style="font-size: 12px; margin-bottom: 10px;">Pumpen startar automatiskt på dessa tider</p>
+            <div id="scheduleList"></div>
+            <div style="display: grid; grid-template-columns: 1fr 60px; gap: 10px; margin-top: 10px;">
+                <input type="time" id="scheduleTime" value="08:00">
+                <button onclick="addSchedule()" style="background: var(--success); color: #000;">➕</button>
+            </div>
+        </div>
+        
         <div class="section">
             <h2>📊 Sensorer</h2>
-            
-            <div class="temp">
-                🌡️ Temperatur: <span id="tempDisplay">--</span>°C
+            <div class="temp">🌡️ Temperatur: <span id="tempDisplay">--</span>°C</div>
+            <div class="sensors" id="sensorsList"></div>
+        </div>
+        
+        <div class="section">
+            <h2>📋 Aktivitetslogg</h2>
+            <div class="log" id="logBox">
+                <div class="log-entry" style="color: var(--accent);">Systemet startade...</div>
             </div>
-            
-            <div class="sensors">
-                <div class="sensor" id="sensor0">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>💧 Sensor 1: <span id="sensor0-text">--%</span></div>
-                        <div style="font-size: 12px;">Gräns: <input type="number" id="sensor0-limit" value="60" min="0" max="100" style="width: 40px; padding: 4px;">%</div>
-                    </div>
-                    <div class="moisture-bar">
-                        <div class="moisture-fill" id="sensor0-fill" style="width: 0%">0%</div>
-                    </div>
-                </div>
-                <div class="sensor" id="sensor1">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>💧 Sensor 2: <span id="sensor1-text">--%</span></div>
-                        <div style="font-size: 12px;">Gräns: <input type="number" id="sensor1-limit" value="60" min="0" max="100" style="width: 40px; padding: 4px;">%</div>
-                    </div>
-                    <div class="moisture-bar">
-                        <div class="moisture-fill" id="sensor1-fill" style="width: 0%">0%</div>
-                    </div>
-                </div>
-                <div class="sensor" id="sensor2">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>💧 Sensor 3: <span id="sensor2-text">--%</span></div>
-                        <div style="font-size: 12px;">Gräns: <input type="number" id="sensor2-limit" value="60" min="0" max="100" style="width: 40px; padding: 4px;">%</div>
-                    </div>
-                    <div class="moisture-bar">
-                        <div class="moisture-fill" id="sensor2-fill" style="width: 0%">0%</div>
-                    </div>
-                </div>
-                <div class="sensor" id="sensor3">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>💧 Sensor 4: <span id="sensor3-text">--%</span></div>
-                        <div style="font-size: 12px;">Gräns: <input type="number" id="sensor3-limit" value="60" min="0" max="100" style="width: 40px; padding: 4px;">%</div>
-                    </div>
-                    <div class="moisture-bar">
-                        <div class="moisture-fill" id="sensor3-fill" style="width: 0%">0%</div>
-                    </div>
-                </div>
-            </div>
+            <button onclick="clearLog()" style="background: var(--danger); color: white; width: 100%; margin-top: 10px;">🗑️ RENSA</button>
         </div>
     </div>
     
     <script>
-        // Start pump
+        let autoMode = false, logs = [], schedule = [];
+        
+        function loadSettings() {
+            const saved = localStorage.getItem('pumpSettings');
+            if (saved) {
+                const settings = JSON.parse(saved);
+                autoMode = settings.autoMode || false;
+                schedule = settings.schedule || [];
+                for (let i = 0; i < 4; i++) {
+                    const limit = document.getElementById(`sensor${i}-limit`);
+                    if (limit && settings[`sensor${i}Limit`]) limit.value = settings[`sensor${i}Limit`];
+                    const autoMin = document.getElementById(`sensor${i}-autoMin`);
+                    const autoMax = document.getElementById(`sensor${i}-autoMax`);
+                    if (autoMin && settings[`sensor${i}AutoMin`]) autoMin.value = settings[`sensor${i}AutoMin`];
+                    if (autoMax && settings[`sensor${i}AutoMax`]) autoMax.value = settings[`sensor${i}AutoMax`];
+                }
+                updateAutoModeButton();
+            }
+            renderSchedule();
+        }
+        
+        function saveSettings() {
+            const settings = { autoMode, schedule };
+            for (let i = 0; i < 4; i++) {
+                const limit = document.getElementById(`sensor${i}-limit`);
+                const autoMin = document.getElementById(`sensor${i}-autoMin`);
+                const autoMax = document.getElementById(`sensor${i}-autoMax`);
+                if (limit) settings[`sensor${i}Limit`] = parseInt(limit.value);
+                if (autoMin) settings[`sensor${i}AutoMin`] = parseInt(autoMin.value);
+                if (autoMax) settings[`sensor${i}AutoMax`] = parseInt(autoMax.value);
+            }
+            localStorage.setItem('pumpSettings', JSON.stringify(settings));
+        }
+        
+        function loadTheme() {
+            if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-mode');
+        }
+        
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+        }
+        
+        function createSensorHTML(index) {
+            return `<div class="sensor" id="sensor${index}"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;"><div>💧 Sensor ${index + 1}: <span id="sensor${index}-text">--%</span></div><div style="font-size: 12px;">Gräns: <input type="number" id="sensor${index}-limit" value="60" min="0" max="100" style="width: 40px; padding: 4px;" onchange="saveSettings()">%</div></div><div class="moisture-bar"><div class="moisture-fill" id="sensor${index}-fill" style="width: 0%">0%</div></div></div>`;
+        }
+        
+        function createAutoSettingsHTML() {
+            let html = '';
+            for (let i = 0; i < 4; i++) html += `<div style="background: var(--bg-primary); padding: 10px; border-radius: 4px; margin-bottom: 10px;"><p style="font-size: 12px; margin-bottom: 5px;">💧 Sensor ${i + 1}</p><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;"><input type="number" id="sensor${i}-autoMin" value="40" min="0" max="100" placeholder="Min %" onchange="saveSettings()"><input type="number" id="sensor${i}-autoMax" value="70" min="0" max="100" placeholder="Max %" onchange="saveSettings()"></div></div>`;
+            return html;
+        }
+        
+        function renderSensors() {
+            let html = '';
+            for (let i = 0; i < 4; i++) html += createSensorHTML(i);
+            document.getElementById('sensorsList').innerHTML = html;
+        }
+        
+        function toggleAutoMode() {
+            autoMode = !autoMode;
+            updateAutoModeButton();
+            document.getElementById('autoSettings').style.display = autoMode ? 'block' : 'none';
+            saveSettings();
+            addLog(autoMode ? '🤖 Auto-mode aktiverad' : '🤖 Auto-mode inaktiverad');
+        }
+        
+        function updateAutoModeButton() {
+            const btn = document.getElementById('autoBtn');
+            btn.classList.toggle('active', autoMode);
+            btn.textContent = autoMode ? '🤖 AUTO-MODE: PÅ' : '🤖 AUTO-MODE: AV';
+        }
+        
+        function addLog(message) {
+            const time = new Date().toLocaleTimeString('sv-SE');
+            logs.push(`${time} - ${message}`);
+            document.getElementById('logBox').innerHTML = logs.slice(-10).map(log => `<div class="log-entry">${log}</div>`).join('');
+        }
+        
+        function clearLog() {
+            logs = [];
+            document.getElementById('logBox').innerHTML = '<div class="log-entry" style="color: var(--accent);">Logg rensad</div>';
+        }
+        
+        function addSchedule() {
+            const time = document.getElementById('scheduleTime').value;
+            if (time && !schedule.includes(time)) {
+                schedule.push(time);
+                schedule.sort();
+                saveSettings();
+                renderSchedule();
+                addLog(`📅 Schema tillagt: ${time}`);
+            }
+        }
+        
+        function renderSchedule() {
+            const scheduleList = document.getElementById('scheduleList');
+            if (schedule.length === 0) {
+                scheduleList.innerHTML = '<p style="font-size: 12px; color: #888;">Ingen schemaläggning</p>';
+            } else {
+                scheduleList.innerHTML = schedule.map(time => `<div class="schedule-item"><span style="font-weight: bold;">${time}</span><button onclick="removeSchedule('${time}')" style="background: var(--danger); width: 100%; padding: 6px;">❌</button></div>`).join('');
+            }
+        }
+        
+        function removeSchedule(time) {
+            schedule = schedule.filter(t => t !== time);
+            saveSettings();
+            renderSchedule();
+            addLog(`📅 Schema borttagen: ${time}`);
+        }
+        
         async function startPump() {
-            await fetch('/api/pump/start', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ speed: 100 })
-            });
+            await fetch('/api/pump/start', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ speed: 100 }) });
+            addLog('🟢 Pumpen startad');
             updateStatus();
         }
-
         
-        // Stop pump
         async function stopPump() {
             await fetch('/api/pump/stop', { method: 'POST' });
+            addLog('🔴 Pumpen stoppad');
             updateStatus();
         }
         
-        // Start timer
         async function startTimer() {
             const seconds = document.getElementById('timerSeconds').value;
-            const speed = document.getElementById('timerSpeed').value;
-            const response = await fetch('/api/timer/start', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ seconds: parseInt(seconds), speed: parseInt(speed) })
-            });
+            await fetch('/api/timer/start', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ seconds: parseInt(seconds), speed: 100 }) });
+            addLog(`⏱️ Timer startad: ${seconds}s`);
             updateStatus();
         }
         
-        // Stop timer
         async function stopTimer() {
             await fetch('/api/timer/stop', { method: 'POST' });
+            addLog('⏹️ Timer stoppad');
             updateStatus();
         }
         
-        // Update status
         async function updateStatus() {
             const response = await fetch('/api/status');
             const data = await response.json();
             
-            // Update pump status
             const statusBox = document.getElementById('statusBox');
             if (data.pump_running) {
                 statusBox.textContent = '🟢 KÖRS';
@@ -375,9 +288,14 @@
                 statusBox.textContent = '🔴 STOPPAD';
                 statusBox.className = 'status-box stopped';
             }
-
             
-            // Update timer
+            let lowestMoisture = 100;
+            data.moisture.forEach((moisture) => { lowestMoisture = Math.min(lowestMoisture, moisture); });
+            if (lowestMoisture < 30) {
+                statusBox.classList.add('warning');
+                statusBox.textContent = '⚠️ EN SENSOR MYCKET TORR!';
+            }
+            
             const timerDisplay = document.getElementById('timerDisplay');
             if (data.timer_running) {
                 timerDisplay.textContent = `⏱️ Timer: ${data.timer_remaining}s`;
@@ -387,10 +305,8 @@
                 timerDisplay.className = 'timer-display';
             }
             
-            // Update temperature
             document.getElementById('tempDisplay').textContent = data.temperature;
             
-            // Update moisture sensors
             data.moisture.forEach((moisture, index) => {
                 const sensorEl = document.getElementById(`sensor${index}`);
                 const textEl = document.getElementById(`sensor${index}-text`);
@@ -398,25 +314,50 @@
                 const limitInput = document.getElementById(`sensor${index}-limit`);
                 const limit = parseInt(limitInput.value) || 60;
                 
-                // Update text
                 textEl.textContent = `${moisture}%`;
-                
-                // Update progress bar
                 fill.style.width = `${moisture}%`;
                 fill.textContent = `${moisture}%`;
-                
-                // Compare with limit
-                if (moisture >= limit) {
-                    sensorEl.className = 'sensor wet';
-                } else {
-                    sensorEl.className = 'sensor dry';
-                }
+                sensorEl.className = moisture >= limit ? 'sensor wet' : 'sensor dry';
             });
+            
+            if (autoMode && !data.pump_running) {
+                for (let i = 0; i < 4; i++) {
+                    const autoMin = parseInt(document.getElementById(`sensor${i}-autoMin`)?.value || 40);
+                    if (data.moisture[i] < autoMin) {
+                        startPump();
+                        addLog(`🤖 Auto: Pumpen startad (Sensor ${i + 1} < ${autoMin}%)`);
+                        break;
+                    }
+                }
+            } else if (autoMode && data.pump_running) {
+                let shouldStop = true;
+                for (let i = 0; i < 4; i++) {
+                    const autoMax = parseInt(document.getElementById(`sensor${i}-autoMax`)?.value || 70);
+                    if (data.moisture[i] < autoMax) {
+                        shouldStop = false;
+                        break;
+                    }
+                }
+                if (shouldStop) {
+                    stopPump();
+                    addLog('🤖 Auto: Pumpen stoppad (alla sensorer > Max%)');
+                }
+            }
+            
+            const now = new Date();
+            const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            if (schedule.includes(currentTime) && !data.pump_running) {
+                startPump();
+                addLog(`📅 Schemaläggd körning: ${currentTime}`);
+            }
         }
         
-        // Auto-update every second
+        loadTheme();
+        renderSensors();
+        loadSettings();
+        document.getElementById('autoLimits').innerHTML = createAutoSettingsHTML();
         setInterval(updateStatus, 1000);
-        updateStatus(); // Initial update
+        updateStatus();
     </script>
 </body>
 </html>
