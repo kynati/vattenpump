@@ -69,16 +69,7 @@
             color: #ff0055;
         }
         
-        .speed-control {
-            margin: 15px 0;
-        }
-        
-        .speed-slider {
-            width: 100%;
-            height: 6px;
-            margin: 10px 0;
-            cursor: pointer;
-        }
+
         
         .button-group {
             display: grid;
@@ -257,21 +248,16 @@
             <div class="status-box stopped" id="statusBox">🔴 STOPPAD</div>
         </div>
         
-        <!-- HASTIGHET -->
+        <!-- PUMP KONTROLL -->
         <div class="section">
-            <h2>⚙️ Hastighets-kontroll</h2>
-            
-            <div style="text-align: center; font-size: 18px; margin-bottom: 10px;">
-                Hastighet: <span id="speedDisplay">0</span>%
-            </div>
-            
-            <input type="range" min="0" max="100" value="0" class="speed-slider" id="speedSlider">
+            <h2>💧 Pump Kontroll</h2>
             
             <div class="button-group">
                 <button class="btn-start" onclick="startPump()">🟢 STARTA</button>
                 <button class="btn-stop" onclick="stopPump()">🔴 STOPPA</button>
             </div>
         </div>
+
         
         <!-- TIMER -->
         <div class="section">
@@ -328,21 +314,16 @@
     </div>
     
     <script>
-        // Update speed display
-        document.getElementById('speedSlider').addEventListener('input', function() {
-            document.getElementById('speedDisplay').textContent = this.value;
-        });
-        
         // Start pump
         async function startPump() {
-            const speed = document.getElementById('speedSlider').value;
-            const response = await fetch('/api/pump/start', {
+            await fetch('/api/pump/start', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ speed: parseInt(speed) })
+                body: JSON.stringify({ speed: 100 })
             });
             updateStatus();
         }
+
         
         // Stop pump
         async function stopPump() {
@@ -376,21 +357,13 @@
             // Update pump status
             const statusBox = document.getElementById('statusBox');
             if (data.pump_running) {
-                if (data.pump_speed === 100) {
-                    statusBox.textContent = '🚀 FULLT ÖS';
-                } else {
-                    statusBox.textContent = '🟢 KÖRS';
-                }
+                statusBox.textContent = '🟢 KÖRS';
                 statusBox.className = 'status-box running';
             } else {
                 statusBox.textContent = '🔴 STOPPAD';
                 statusBox.className = 'status-box stopped';
             }
-            
-            // Update speed
-            if (data.pump_running) {
-                document.getElementById('speedDisplay').textContent = data.pump_speed;
-            }
+
             
             // Update timer
             const timerDisplay = document.getElementById('timerDisplay');
