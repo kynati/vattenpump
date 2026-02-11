@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💧 Pump Kontroll</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #1e1e2e;
+            color: #ffffff;
+            padding: 10px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 2px solid #00d4ff;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            font-size: 28px;
+            color: #00d4ff;
+            margin-bottom: 5px;
+        }
+        
+        .mode {
+            font-size: 12px;
+            color: #888888;
+        }
+        
+        .section {
+            background: #2d2d3d;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #00d4ff;
+        }
+        
+        .section h2 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #00d4ff;
+        }
+        
+        .status-box {
+            background: #1e1e2e;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .status-box.stopped {
+            color: #ff0055;
+        }
+        
+        .speed-control {
+            margin: 15px 0;
+        }
+        
+        .speed-slider {
+            width: 100%;
+            height: 6px;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+        
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        button {
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        
+        button:active {
+            opacity: 0.8;
+        }
+        
+        .btn-start {
+            background: #00ff41;
+            color: #000;
+        }
+        
+        .btn-stop {
+            background: #ff0055;
+            color: #fff;
+        }
+        
+        .timer-input {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        input[type="number"] {
+            padding: 10px;
+            border: 1px solid #00d4ff;
+            background: #1e1e2e;
+            color: #fff;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        input[type="number"]::placeholder {
+            color: #666;
+        }
+        
+        .sensors {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+        
+        .sensor {
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            text-align: center;
+            transition: background 0.3s;
+        }
+        
+        .sensor.wet {
+            background: #00ff41;
+            color: #000;
+        }
+        
+        .sensor.dry {
+            background: #ff0055;
+            color: #fff;
+        }
+        
+        .temp {
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #1e1e2e;
+            border-radius: 4px;
+        }
+        
+        .timer-display {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #1e1e2e;
+            border-radius: 4px;
+            color: #888;
+        }
+        
+        .timer-display.running {
+            color: #00ff41;
+        }
+        
+        /* Pump Animation */
+        @keyframes pump-pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(0, 255, 65, 0.7);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 20px 10px rgba(0, 255, 65, 0.3);
+            }
+        }
+        
+        @keyframes pump-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .status-box.running {
+            animation: pump-pulse 1.5s infinite;
+        }
+        
+        .status-box.running::after {
+            content: ' ⚙️';
+            display: inline-block;
+            animation: pump-spin 2s linear infinite;
+        }
+        
+        /* Moisture Progress Bar */
+        .moisture-bar {
+            width: 100%;
+            height: 25px;
+            background: #1e1e2e;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 8px;
+            border: 1px solid #444;
+        }
+        
+        .moisture-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0055, #ff6b00, #00ff41);
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #fff;
+        }
+        
+        @media (max-width: 600px) {
+            body {
+                padding: 5px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .section {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>💧 PUMP KONTROLL</h1>
+            <div class="mode">🎲 SIMULERING</div>
+        </header>
+        
+        <!-- STATUS -->
+        <div class="section">
+            <div class="status-box stopped" id="statusBox">🔴 STOPPAD</div>
+        </div>
+        
+        <!-- HASTIGHET -->
+        <div class="section">
+            <h2>⚙️ Hastighets-kontroll</h2>
+            
+            <div style="text-align: center; font-size: 18px; margin-bottom: 10px;">
+                Hastighet: <span id="speedDisplay">0</span>%
+            </div>
+            
+            <input type="range" min="0" max="100" value="0" class="speed-slider" id="speedSlider">
+            
+            <div class="button-group">
+                <button class="btn-start" onclick="startPump()">🟢 STARTA</button>
+                <button class="btn-stop" onclick="stopPump()">🔴 STOPPA</button>
+            </div>
+        </div>
+        
+        <!-- TIMER -->
+        <div class="section">
+            <h2>⏱️ Timer-kontroll</h2>
+            
+            <div class="timer-display" id="timerDisplay">⏱️ Timer: Inaktiv</div>
+            
+            <div class="timer-input">
+                <input type="number" id="timerSeconds" value="30" placeholder="Sekunder" min="1">
+                <input type="number" id="timerSpeed" value="100" placeholder="Hastighet" min="0" max="100">
+            </div>
+            
+            <div class="button-group">
+                <button class="btn-start" onclick="startTimer()">▶️ STARTA</button>
+                <button class="btn-stop" onclick="stopTimer()">⏹️ STOPPA</button>
+            </div>
+        </div>
+        
+        <!-- SENSORER -->
+        <div class="section">
+            <h2>📊 Sensorer</h2>
+            
+            <div class="temp">
+                🌡️ Temperatur: <span id="tempDisplay">--</span>°C
+            </div>
+            
+            <div class="sensors">
+                <div class="sensor" id="sensor0">
+                    💧 Sensor 1: <span id="sensor0-text">--%</span>
+                    <div class="moisture-bar">
+                        <div class="moisture-fill" id="sensor0-fill" style="width: 0%">0%</div>
+                    </div>
+                </div>
+                <div class="sensor" id="sensor1">
+                    💧 Sensor 2: <span id="sensor1-text">--%</span>
+                    <div class="moisture-bar">
+                        <div class="moisture-fill" id="sensor1-fill" style="width: 0%">0%</div>
+                    </div>
+                </div>
+                <div class="sensor" id="sensor2">
+                    💧 Sensor 3: <span id="sensor2-text">--%</span>
+                    <div class="moisture-bar">
+                        <div class="moisture-fill" id="sensor2-fill" style="width: 0%">0%</div>
+                    </div>
+                </div>
+                <div class="sensor" id="sensor3">
+                    💧 Sensor 4: <span id="sensor3-text">--%</span>
+                    <div class="moisture-bar">
+                        <div class="moisture-fill" id="sensor3-fill" style="width: 0%">0%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Update speed display
+        document.getElementById('speedSlider').addEventListener('input', function() {
+            document.getElementById('speedDisplay').textContent = this.value;
+        });
+        
+        // Start pump
+        async function startPump() {
+            const speed = document.getElementById('speedSlider').value;
+            const response = await fetch('/api/pump/start', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ speed: parseInt(speed) })
+            });
+            updateStatus();
+        }
+        
+        // Stop pump
+        async function stopPump() {
+            await fetch('/api/pump/stop', { method: 'POST' });
+            updateStatus();
+        }
+        
+        // Start timer
+        async function startTimer() {
+            const seconds = document.getElementById('timerSeconds').value;
+            const speed = document.getElementById('timerSpeed').value;
+            const response = await fetch('/api/timer/start', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ seconds: parseInt(seconds), speed: parseInt(speed) })
+            });
+            updateStatus();
+        }
+        
+        // Stop timer
+        async function stopTimer() {
+            await fetch('/api/timer/stop', { method: 'POST' });
+            updateStatus();
+        }
+        
+        // Update status
+        async function updateStatus() {
+            const response = await fetch('/api/status');
+            const data = await response.json();
+            
+            // Update pump status
+            const statusBox = document.getElementById('statusBox');
+            if (data.pump_running) {
+                if (data.pump_speed === 100) {
+                    statusBox.textContent = '🚀 FULLT ÖS';
+                } else {
+                    statusBox.textContent = '🟢 KÖRS';
+                }
+                statusBox.className = 'status-box running';
+            } else {
+                statusBox.textContent = '🔴 STOPPAD';
+                statusBox.className = 'status-box stopped';
+            }
+            
+            // Update speed
+            if (data.pump_running) {
+                document.getElementById('speedDisplay').textContent = data.pump_speed;
+            }
+            
+            // Update timer
+            const timerDisplay = document.getElementById('timerDisplay');
+            if (data.timer_running) {
+                timerDisplay.textContent = `⏱️ Timer: ${data.timer_remaining}s`;
+                timerDisplay.className = 'timer-display running';
+            } else {
+                timerDisplay.textContent = '⏱️ Timer: Inaktiv';
+                timerDisplay.className = 'timer-display';
+            }
+            
+            // Update temperature
+            document.getElementById('tempDisplay').textContent = data.temperature;
+            
+            // Update moisture sensors
+            data.moisture.forEach((moisture, index) => {
+                const sensorEl = document.getElementById(`sensor${index}`);
+                const textEl = document.getElementById(`sensor${index}-text`);
+                const fill = document.getElementById(`sensor${index}-fill`);
+                
+                // Update text
+                textEl.textContent = `${moisture}%`;
+                
+                // Update progress bar
+                fill.style.width = `${moisture}%`;
+                fill.textContent = `${moisture}%`;
+                
+                if (moisture >= 60) {
+                    sensorEl.className = 'sensor wet';
+                } else {
+                    sensorEl.className = 'sensor dry';
+                }
+            });
+        }
+        
+        // Auto-update every second
+        setInterval(updateStatus, 1000);
+        updateStatus(); // Initial update
+    </script>
+</body>
+</html>
