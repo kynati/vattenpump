@@ -286,25 +286,37 @@
             
             <div class="sensors">
                 <div class="sensor" id="sensor0">
-                    💧 Sensor 1: <span id="sensor0-text">--%</span>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>💧 Sensor 1: <span id="sensor0-text">--%</span></div>
+                        <div style="font-size: 12px;">Gräns: <input type="number" id="sensor0-limit" value="60" min="0" max="100" style="width: 40px; padding: 4px;">%</div>
+                    </div>
                     <div class="moisture-bar">
                         <div class="moisture-fill" id="sensor0-fill" style="width: 0%">0%</div>
                     </div>
                 </div>
                 <div class="sensor" id="sensor1">
-                    💧 Sensor 2: <span id="sensor1-text">--%</span>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>💧 Sensor 2: <span id="sensor1-text">--%</span></div>
+                        <div style="font-size: 12px;">Gräns: <input type="number" id="sensor1-limit" value="60" min="0" max="100" style="width: 40px; padding: 4px;">%</div>
+                    </div>
                     <div class="moisture-bar">
                         <div class="moisture-fill" id="sensor1-fill" style="width: 0%">0%</div>
                     </div>
                 </div>
                 <div class="sensor" id="sensor2">
-                    💧 Sensor 3: <span id="sensor2-text">--%</span>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>💧 Sensor 3: <span id="sensor2-text">--%</span></div>
+                        <div style="font-size: 12px;">Gräns: <input type="number" id="sensor2-limit" value="60" min="0" max="100" style="width: 40px; padding: 4px;">%</div>
+                    </div>
                     <div class="moisture-bar">
                         <div class="moisture-fill" id="sensor2-fill" style="width: 0%">0%</div>
                     </div>
                 </div>
                 <div class="sensor" id="sensor3">
-                    💧 Sensor 4: <span id="sensor3-text">--%</span>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>💧 Sensor 4: <span id="sensor3-text">--%</span></div>
+                        <div style="font-size: 12px;">Gräns: <input type="number" id="sensor3-limit" value="60" min="0" max="100" style="width: 40px; padding: 4px;">%</div>
+                    </div>
                     <div class="moisture-bar">
                         <div class="moisture-fill" id="sensor3-fill" style="width: 0%">0%</div>
                     </div>
@@ -383,6 +395,8 @@
                 const sensorEl = document.getElementById(`sensor${index}`);
                 const textEl = document.getElementById(`sensor${index}-text`);
                 const fill = document.getElementById(`sensor${index}-fill`);
+                const limitInput = document.getElementById(`sensor${index}-limit`);
+                const limit = parseInt(limitInput.value) || 60;
                 
                 // Update text
                 textEl.textContent = `${moisture}%`;
@@ -391,7 +405,8 @@
                 fill.style.width = `${moisture}%`;
                 fill.textContent = `${moisture}%`;
                 
-                if (moisture >= 60) {
+                // Compare with limit
+                if (moisture >= limit) {
                     sensorEl.className = 'sensor wet';
                 } else {
                     sensorEl.className = 'sensor dry';
